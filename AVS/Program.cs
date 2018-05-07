@@ -57,12 +57,14 @@ namespace AVS
 			Settings.Default.Save();
 		}
 
-		new void Update()
+		void Update(bool init = false)
 		{
-			if (!enabled || isHeadphoneMode == (isHeadphoneMode = (int)dsKey.GetValue("SpeakerMode") == 0))
+			// assignment is first in condition in order to avoid short-circuit
+			if ((isHeadphoneMode == (isHeadphoneMode = (int)dsKey.GetValue("SpeakerMode") == 0) && !init) || !enabled)
 				return;
 
-			SaveConfig();
+			if (!init)
+				SaveConfig();
 
 			var vol = isHeadphoneMode ? Settings.Default.HeadphonesVol : Settings.Default.SpeakersVol;
 			vol = vol < 0 ? 0 : (vol > 100 ? 100 : vol);
@@ -97,7 +99,7 @@ namespace AVS
 				new MenuItem("Info", (object sender, EventArgs e) =>
 				{
 					MessageBox.Show("Automagically changes master volume when headphones are\n" +
-									"plugged into the front panel of the Creative Sound Blaster Z.\n\n" +
+									"plugged into the front panel of Creative Sound Blaster Z.\n\n" +
 									"Coded by DSAureli - 2016-2018",
 									"AVS - Auto Volume Switcher", MessageBoxButtons.OK, MessageBoxIcon.Information);
 				}),
@@ -119,7 +121,7 @@ namespace AVS
 			trayIcon.ContextMenu = trayMenu;
 			trayIcon.Visible = true;
 
-			Update();
+			Update(true);
 		}
 
 		protected override void OnLoad(EventArgs e)
